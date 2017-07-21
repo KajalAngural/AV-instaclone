@@ -20,7 +20,9 @@ import re
 
 #imgur API provides server to store images users uploads
 from imgurpython import ImgurClient
-my_api_key = "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"
+
+
+
 
 # Create your views here.
 
@@ -48,7 +50,7 @@ def signup_view(request):
             user.save()
 
             #code to send mail to the user
-            send = sendgrid.SendGridAPIClient(apikey=my_api_key)
+            send = sendgrid.SendGridAPIClient(apikey=my_grid_api)
             from_email = Email("kajalangural1@gmail.com")
             to_email = Email(email)
             subject = "Confirmation Mail"
@@ -121,6 +123,8 @@ def post_view(request):
                 post.image_url = client.upload_from_path(path, anon=True)['link']
                 post.save()
 
+                ctypes.windll.user32.MessageBoxW(0, u"Post Created!!!!", u"Success", 0)
+
                 return redirect('/feed/')
 
         else:
@@ -136,7 +140,7 @@ def feed_view(request):
     user = check_validation(request)
     if user:
 
-        posts = PostModel.objects.all().order_by('created_on')
+        posts = PostModel.objects.all().order_by('-created_on')
 
         for post in posts:
             existing_like = LikeModel.objects.filter(post_id=post.id, user=user).first()
@@ -180,6 +184,8 @@ def comment_view(request):
             comment_text = form.cleaned_data.get('comment_text')
             comment = CommentModel.objects.create(user=user, post_id=post_id, comment_text=comment_text)
             comment.save()
+            ctypes.windll.user32.MessageBoxW(0, u"Successfully commented the post..!!!!!\nClick Ok", u"Success", 0)
+
             return redirect('/feed/')
         else:
             return redirect('/feed/')
