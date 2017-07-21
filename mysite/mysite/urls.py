@@ -21,13 +21,13 @@ from django.contrib import admin
 from myapp.views import signup_view, login_view, feed_view, post_view,like_view,comment_view
 
 urlpatterns= [
-url(r'^admin/', admin.site.urls),           #to admin page
-    url('post/', post_view),            #to postview.html
-    url('feed/', feed_view),            #to feed.html
-    url('like/', like_view),            #to like post
-    url('comment/', comment_view),          #to comment on post
-    url('login1/', login_view),         #to l0gin1.html
-    url('', signup_view),           #to homepage(signuo.html)
+url(r'^admin/', admin.site.urls),
+    url('post/', post_view),
+    url('feed/', feed_view),
+    url('like/', like_view),
+    url('comment/', comment_view),
+    url('login1/', login_view),
+    url('', signup_view),
 
 
 ]

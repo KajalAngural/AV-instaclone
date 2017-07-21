@@ -1,21 +1,33 @@
-
 from django.shortcuts import render, redirect
 from forms import SignUpForm, LoginForm, PostForm, LikeForm, CommentForm
 from models import User, SessionToken, PostModel, LikeModel, CommentModel
+
+#importing to convert paasword into hashcode
 from django.contrib.auth.hashers import make_password, check_password
-from datetime import timedelta
+from datetime import timedelta,datetime
 from django.utils import timezone
 from mysite.settings import BASE_DIR
+
+#pre-installed library ctypes for showing pop up messageboxes
 import ctypes
+
+#sendgrid API used for sending mails to the new users
 from sendgrid.helpers.mail import *
 import sendgrid
+
+#used for rematching the input
 import re
+
+#imgur API provides server to store images users uploads
 from imgurpython import ImgurClient
 my_api_key = "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"
 
 # Create your views here.
 
+
+#declarating function for signing up a new user
 def signup_view(request):
+    today = datetime.now()
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -34,6 +46,8 @@ def signup_view(request):
             #saving data to DB
             user = User(name=name, password=make_password(password), email=email, username=username)
             user.save()
+
+            #code to send mail to the user
             send = sendgrid.SendGridAPIClient(apikey=my_api_key)
             from_email = Email("kajalangural1@gmail.com")
             to_email = Email(email)
@@ -56,9 +70,10 @@ def signup_view(request):
 
         form = SignUpForm()
 
-    return render(request, 'signup.html', {'form' : form})
+    return render(request, 'signup.html', {'date_show':today,'form' : form})
 
 
+#declaring function to login a already user
 def login_view(request):
     response_data = {}
     if request.method == "POST":
@@ -70,6 +85,7 @@ def login_view(request):
 
             if user:
                 if check_password(password, user.password):
+                    #generating session token
                     token = SessionToken(user=user)
                     token.create_token()
                     token.save()
@@ -86,6 +102,7 @@ def login_view(request):
     return render(request, 'login1.html', response_data)
 
 
+#declaring function for posting
 def post_view(request):
     user = check_validation(request)
 
@@ -114,6 +131,7 @@ def post_view(request):
         return redirect('/login1/')
 
 
+#declaring function to show feeds to the user
 def feed_view(request):
     user = check_validation(request)
     if user:
@@ -131,6 +149,7 @@ def feed_view(request):
         return redirect('/login1/')
 
 
+#declaring function to like the post
 def like_view(request):
     user = check_validation(request)
     if user and request.method == 'POST':
@@ -144,12 +163,14 @@ def like_view(request):
 
 
             else:
-                existing_like.delete()
+                existing_like.delete()          #deleting the like of liked post
             return redirect('/feed/')
     else:
         return redirect('/login1/')
 
 
+
+#declaring function to comment on post
 def comment_view(request):
     user = check_validation(request)
     if user and request.method == 'POST':
@@ -166,15 +187,14 @@ def comment_view(request):
         return redirect('/login1')
 
 
-        # For validating the session
-
-
+# For validating the session
 def check_validation(request):
     if request.COOKIES.get('session_token'):
         session = SessionToken.objects.filter(session_token=request.COOKIES.get('session_token')).first()
         if session:
+            #time to expire session token
             time_to_live = session.created_on + timedelta(minutes=5)
             if time_to_live > timezone.now():
                 return session.user
     else:
-        return None
+       return None

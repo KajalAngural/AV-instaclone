@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Instagran Clone</title>
+    <title>Instagram Clone</title>
     <style>
         body{
         background-image: url("{% static "feed_1.jpg"%}");
@@ -13,12 +13,10 @@
     </style>
 </head>
 <body>
-    <form method="post" action="post/">
+    <form method="post" action="/post/">
         {% csrf_token %}
         <input type="submit" class="btn-default btn" value="Create Post">
     </form>
-
-
     {% for post in posts %}
 
 

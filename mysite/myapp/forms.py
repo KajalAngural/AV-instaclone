@@ -29,6 +29,7 @@ class LikeForm(forms.ModelForm):
         fields=['post']
 
 
+#declaring class to comment on post
 class CommentForm(forms.ModelForm):
 
     class Meta:

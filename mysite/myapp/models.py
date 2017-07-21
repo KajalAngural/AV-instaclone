@@ -1,7 +1,10 @@
+
 from django.db import models
-from django.db import models
+
+#uuid genrates random strings
 import uuid
 
+#class for user's details
 class User(models.Model):
     email = models.EmailField(default=None)
     name = models.CharField(max_length=120)
@@ -11,6 +14,7 @@ class User(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
 
 
+#class for creating session token
 class SessionToken(models.Model):
 	user = models.ForeignKey(User)
 	session_token = models.CharField(max_length=255)
@@ -20,6 +24,7 @@ class SessionToken(models.Model):
 	def create_token(self):
 		self.session_token = uuid.uuid4()
 
+#class for posting
 class PostModel(models.Model):
 	user = models.ForeignKey(User)
 	image = models.FileField(upload_to='user_images')
@@ -30,14 +35,16 @@ class PostModel(models.Model):
 	has_liked = False
 
 
-	@property
+	@property			#it will show the number of likes
 	def like_count(self):
 		return len(LikeModel.objects.filter(post=self))
 
-	@property
+	@property			#it will show the commments
 	def comments(self):
 		return CommentModel.objects.filter(post=self).order_by('-created_on')
 
+
+#class for liking a post
 class LikeModel(models.Model):
 	user = models.ForeignKey(User)
 	post = models.ForeignKey(PostModel)
@@ -45,6 +52,8 @@ class LikeModel(models.Model):
 	updated_on = models.DateTimeField(auto_now=True)
 
 
+
+#class for commenting on post
 class CommentModel(models.Model):
 	user = models.ForeignKey(User)
 	post = models.ForeignKey(PostModel)
