@@ -6,8 +6,12 @@ from django.contrib.auth.hashers import make_password, check_password
 from datetime import timedelta
 from django.utils import timezone
 from mysite.settings import BASE_DIR
-
+import ctypes
+from sendgrid.helpers.mail import *
+import sendgrid
+import re
 from imgurpython import ImgurClient
+my_api_key = "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"
 
 # Create your views here.
 
@@ -16,15 +20,40 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
+            if not re.match("[a-zA-Z]*$",username):
+                ctypes.windll.user32.MessageBoxW(0, u"kindly enter valid details!!!", u"Error", 0)
+
             name = form.cleaned_data['name']
+            if not re.match("[a-zA-Z]*$",name):
+                ctypes.windll.user32.MessageBoxW(0, u"kindly enter valid details!!!", u"Error", 0)
+
             email = form.cleaned_data['email']
+            if not re.match("[a-z0-9@.]*$",email):
+                ctypes.windll.user32.MessageBoxW(0, u"kindly enter valid details!!!", u"Error", 0)
             password = form.cleaned_data['password']
             #saving data to DB
             user = User(name=name, password=make_password(password), email=email, username=username)
             user.save()
+            send = sendgrid.SendGridAPIClient(apikey=my_api_key)
+            from_email = Email("kajalangural1@gmail.com")
+            to_email = Email(email)
+            subject = "Confirmation Mail"
+            content = Content("text/plain", "to verify provided email adress")
+            mail = Mail(from_email, subject, to_email, content)
+            response = send.client.mail.send.post(request_body=mail.get())
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+
+
+            ctypes.windll.user32.MessageBoxW(0, u"Successfully signed in..!!!!!\n\nEmail has been sent\n\nClick Ok", u"Success", 0)
+
             return render(request, 'feed.html')
-            #return redirect('login/')
+
+
     else:
+
+
         form = SignUpForm()
 
     return render(request, 'signup.html', {'form' : form})
@@ -78,6 +107,7 @@ def post_view(request):
                 return redirect('/feed/')
 
         else:
+            ctypes.windll.user32.MessageBoxW(0, u"Invalid Post!!!!",u"Error", 0)
             form = PostForm()
         return render(request, 'postview.html', {'form': form})
     else:
@@ -110,6 +140,9 @@ def like_view(request):
             existing_like = LikeModel.objects.filter(post_id=post_id, user=user).first()
             if not existing_like:
                 LikeModel.objects.create(post_id=post_id, user=user)
+                ctypes.windll.user32.MessageBoxW(0, u"Successfully liked the post..!!!!!\nClick Ok", u"Success", 0)
+
+
             else:
                 existing_like.delete()
             return redirect('/feed/')
